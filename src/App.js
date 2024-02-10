@@ -1,12 +1,15 @@
 import { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
+import CardList from './components/card-list';
+import SearchBox from './components/search-box';
+import Header from './components/header';
 
 class App extends Component {
 
   constructor() {
     super()
     this.state = {
+      searchText: "",
       search: "",
       masters: [],
       filtered: []
@@ -14,12 +17,12 @@ class App extends Component {
   }
 
   componentDidMount() {
-    fetch("https://jsonplaceholder.org/users/")
+    fetch("https://dummyjson.com/users")
     .then((res) => res.json())
     .then((res) => {
       this.setState({
-        masters: res,
-        filtered: res
+        masters: res.users,
+        filtered: res.users
       })
     })
   }
@@ -30,39 +33,29 @@ class App extends Component {
     })
   }
 
-  handleChange = (e) => {
-    e.preventDefault()
-
-    const newSearchKey = e.target.value.toLowerCase()
-
-    const filtered = this.state.masters.filter((master) => {
-      return master.firstname.toLowerCase().includes(newSearchKey) || master.lastname.toLowerCase().includes(newSearchKey) || master.email.toLowerCase().includes(newSearchKey)
-    })
-
-    console.log(filtered)
-
+  onChangeHandler = (e) => {
     this.setState({
-      search: e.target.value,
-      filtered: filtered
+      searchText: e.target.value
     })
   }
 
   render() {
+
+    const { searchText } = this.state
+
+    const filteredMasters = this.state.masters.filter((master) => {
+      return master.firstName.includes(searchText) || master.lastName.includes(searchText) || master.email.includes(searchText)
+    })
+
     return (
-      <div className="App">
-      <div>
-        <input 
-          type="text" 
-          value={this.state.search} 
-          placeholder='Search' 
-          onChange={this.handleChange} />
-          
-      </div>
-       {
-        this.state.filtered.map((master, i) => {
-          return (<div key={i}> {master.firstname} {master.lastname} </div>)
-        })
-      }
+      <div className="App container">
+        <Header />
+        <SearchBox  className="input-group mt-3"
+                    searchText={searchText} 
+                    onChangeHandler={this.onChangeHandler} 
+                    placeholderText={'Search'} 
+                    />
+        <CardList users={filteredMasters} />
       </div>
     );
   }
